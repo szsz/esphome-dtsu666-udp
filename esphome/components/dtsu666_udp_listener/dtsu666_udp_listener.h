@@ -35,6 +35,12 @@ class ModbusUdpListener : public Component {
     return f;
   }
 
+  // Convert 2 bytes big-endian to float (as signed 16-bit, scaled)
+  static float be_float16_(const uint8_t *p, float scale = 1.0f) {
+    int16_t v = (int16_t)((uint16_t(p[0]) << 8) | uint16_t(p[1]));
+    return float(v) / scale;
+  }
+
   WiFiUDP udp_;
   uint16_t port_{2024};
   bool has_device_id_{false};

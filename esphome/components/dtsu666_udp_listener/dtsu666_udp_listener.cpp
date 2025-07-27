@@ -32,41 +32,54 @@ void ModbusUdpListener::dump_config() {
   ESP_LOGCONFIG(TAG, "DTU Modbus UDP listener");
   ESP_LOGCONFIG(TAG, "  Port: %u", this->port_);
   if (this->has_device_id_) ESP_LOGCONFIG(TAG, "  Device ID filter: %u", this->device_id_);
-  LOG_SENSOR("  ", "Pt (W x0.1)", this->pt_);
-  LOG_SENSOR("  ", "Pa (W x0.1)", this->pa_);
-  LOG_SENSOR("  ", "Pb (W x0.1)", this->pb_);
-  LOG_SENSOR("  ", "Pc (W x0.1)", this->pc_);
-  LOG_SENSOR("  ", "Qt (var x0.1)", this->qt_);
-  LOG_SENSOR("  ", "Qa (var x0.1)", this->qa_);
-  LOG_SENSOR("  ", "Qb (var x0.1)", this->qb_);
-  LOG_SENSOR("  ", "Qc (var x0.1)", this->qc_);
+  LOG_SENSOR("  ", "Pt (kW)", this->pt_);
+  LOG_SENSOR("  ", "Pa (kW)", this->pa_);
+  LOG_SENSOR("  ", "Pb (kW)", this->pb_);
+  LOG_SENSOR("  ", "Pc (kW)", this->pc_);
+  LOG_SENSOR("  ", "Qt (kvar)", this->qt_);
+  LOG_SENSOR("  ", "Qa (kvar)", this->qa_);
+  LOG_SENSOR("  ", "Qb (kvar)", this->qb_);
+  LOG_SENSOR("  ", "Qc (kvar)", this->qc_);
 }
 
-// Scan for: <id> 0x03 0x2C (44 data bytes) … (we ignore CRC in UDP payloads)
-// Values are 11 x float32 BE; we publish 4..11 (indexes 3..10) scaled by 0.1
+// Scan for: <id> 0x03 0x16 (22 data bytes) … (we ignore CRC in UDP payloads)
+// Values are 11 x float16 (2 bytes, big-endian); we publish 4..11 (indexes 3..10) scaled by 0.1
 bool ModbusUdpListener::parse_packet_(const uint8_t *data, size_t len) {
-  for (size_t i = 0; i + 3 + 44 <= len; i++) {
-    if (data[i + 1] != 0x03 || data[i + 2] != 0x2C) continue;
-    uint8_t id = data[i];
-    if (this->has_device_id_ && id != this->device_id_) continue;
-
-    float regs[11];
-    const uint8_t *p = &data[i + 3];
-    for (int k = 0; k < 11; k++, p += 4) regs[k] = be_float_(p);
-
-    constexpr float SCALE = 0.1f;
-    if (this->pt_) this->pt_->publish_state(regs[3] * SCALE);
-    if (this->pa_) this->pa_->publish_state(regs[4] * SCALE);
-    if (this->pb_) this->pb_->publish_state(regs[5] * SCALE);
-    if (this->pc_) this->pc_->publish_state(regs[6] * SCALE);
-    if (this->qt_) this->qt_->publish_state(regs[7] * SCALE);
-    if (this->qa_) this->qa_->publish_state(regs[8] * SCALE);
-    if (this->qb_) this->qb_->publish_state(regs[9] * SCALE);
-    if (this->qc_) this->qc_->publish_state(regs[10] * SCALE);
-
-    return true;  // handled one frame
+  // Minimum length: 1 (id) + 1 (func) + 1 (len) + 24 (data) = 27 bytes
+  if (len < 57) {
+    ESP_LOGW(TAG, "UDP packet too short (%u bytes)", (unsigned)len);
+    return false;
   }
-  return false;
+
+  uint8_t id = data[0];
+  if (data[1] != 0x03 || data[2] != 0x20 || data[3] != 0x0C) {
+    ESP_LOGW(TAG, "UDP packet does not match expected header");
+    return false;
+  }
+  if (this->has_device_id_ && id != this->device_id_) {
+    ESP_LOGW(TAG, "Device ID %u does not match filter %u", id, this->device_id_);
+    return false;
+  }
+
+  float regs[11];
+  const uint8_t *p = &data[6];
+  for (int k = 0; k < 11; k++, p += 2) {
+    regs[k] = be_float16_(p, 10.0f);  // scale by 10 if needed
+    ESP_LOGI(TAG, "regs[%d] = %f", k, regs[k]);
+  }
+
+  if (this->pt_) this->pt_->publish_state(regs[3]);
+  if (this->pa_) this->pa_->publish_state(regs[4]);
+  if (this->pb_) this->pb_->publish_state(regs[5]);
+  if (this->pc_) this->pc_->publish_state(regs[6]);
+  if (this->qt_) this->qt_->publish_state(regs[7]);
+  if (this->qa_) this->qa_->publish_state(regs[8]);
+  if (this->qb_) this->qb_->publish_state(regs[9]);
+  if (this->qc_) this->qc_->publish_state(regs[10]);
+
+  ESP_LOGI(TAG, "Published sensor values from matched frame.");
+
+  return true;  // handled one frame
 }
 
 }  // namespace dtsu666_udp_listener
