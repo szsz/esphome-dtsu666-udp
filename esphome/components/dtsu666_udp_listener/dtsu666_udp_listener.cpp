@@ -15,7 +15,14 @@ void ModbusUdpListener::loop() {
   while (packet_size > 0) {
     uint8_t buf[700];
     size_t len = this->udp_.read(buf, sizeof(buf));
-    ESP_LOG_BUFFER_HEX(TAG, buf, len);
+    // Log raw UDP packet data as hex string (first 64 bytes max)
+    char hexbuf[3 * 64 + 1];
+    size_t hexlen = len > 64 ? 64 : len;
+    for (size_t i = 0; i < hexlen; i++) {
+      sprintf(&hexbuf[i * 3], "%02X ", buf[i]);
+    }
+    hexbuf[hexlen * 3] = 0;
+    ESP_LOGI(TAG, "Raw UDP packet (%u bytes): %s", (unsigned)len, hexbuf);
     this->parse_packet_(buf, len);
     packet_size = this->udp_.parsePacket();
   }
