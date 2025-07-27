@@ -12,8 +12,7 @@ logger:
 api:
 
 external_components:
-  - source: github://szsz/esphome-dtsu666-udp
-    components: [dtsu666_udp_listener]
+  - source: components
 
 dtsu666_udp_listener:
   id: dtsu
