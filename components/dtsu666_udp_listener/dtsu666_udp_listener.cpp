@@ -62,9 +62,12 @@ bool ModbusUdpListener::parse_packet_(const uint8_t *data, size_t len) {
   }
 
   float regs[11];
-  const uint8_t *p = &data[6];
-  for (int k = 0; k < 11; k++, p += 2) {
-    regs[k] = be_float16_(p, 10.0f);  // scale by 10 if needed
+  const uint8_t *p = &data[11];
+  for (int k = 0; k < 11; k++, p += 4) {
+    uint32_t val = (uint32_t(p[0]) << 24) | (uint32_t(p[1]) << 16) | (uint32_t(p[2]) << 8) | uint32_t(p[3]);
+    float f;
+    std::memcpy(&f, &val, sizeof(float));
+    regs[k] = f;
     //ESP_LOGI(TAG, "regs[%d] = %f", k, regs[k]);
   }
 
