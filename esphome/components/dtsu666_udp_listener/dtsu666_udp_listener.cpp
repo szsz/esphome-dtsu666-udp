@@ -15,6 +15,7 @@ void ModbusUdpListener::loop() {
   while (packet_size > 0) {
     uint8_t buf[700];
     size_t len = this->udp_.read(buf, sizeof(buf));
+    ESP_LOG_BUFFER_HEX(TAG, buf, len);
     this->parse_packet_(buf, len);
     packet_size = this->udp_.parsePacket();
   }

@@ -10,7 +10,6 @@ wifi:
 
 logger:
 api:
-ota:
 
 external_components:
   - source: github://szsz/esphome-dtsu666-udp
