@@ -47,17 +47,17 @@ void ModbusUdpListener::dump_config() {
 bool ModbusUdpListener::parse_packet_(const uint8_t *data, size_t len) {
   // Minimum length: 1 (id) + 1 (func) + 1 (len) + 24 (data) = 27 bytes
   if (len < 57) {
-    ESP_LOGW(TAG, "UDP packet too short (%u bytes)", (unsigned)len);
+    //ESP_LOGW(TAG, "UDP packet too short (%u bytes)", (unsigned)len);
     return false;
   }
 
   uint8_t id = data[0];
   if (data[1] != 0x03 || data[2] != 0x20 || data[3] != 0x0C) {
-    ESP_LOGW(TAG, "UDP packet does not match expected header");
+    //ESP_LOGW(TAG, "UDP packet does not match expected header");
     return false;
   }
   if (this->has_device_id_ && id != this->device_id_) {
-    ESP_LOGW(TAG, "Device ID %u does not match filter %u", id, this->device_id_);
+    //ESP_LOGW(TAG, "Device ID %u does not match filter %u", id, this->device_id_);
     return false;
   }
 
@@ -65,10 +65,14 @@ bool ModbusUdpListener::parse_packet_(const uint8_t *data, size_t len) {
   const uint8_t *p = &data[6];
   for (int k = 0; k < 11; k++, p += 2) {
     regs[k] = be_float16_(p, 10.0f);  // scale by 10 if needed
-    ESP_LOGI(TAG, "regs[%d] = %f", k, regs[k]);
+    //ESP_LOGI(TAG, "regs[%d] = %f", k, regs[k]);
   }
 
-  if (this->pt_) this->pt_->publish_state(regs[3]);
+  if (this->pt_) {
+    this->pt_->publish_state(regs[3]);
+  } else {
+    ESP_LOGE(TAG, "pt_ sensor pointer is null!");
+  }
   if (this->pa_) this->pa_->publish_state(regs[4]);
   if (this->pb_) this->pb_->publish_state(regs[5]);
   if (this->pc_) this->pc_->publish_state(regs[6]);
