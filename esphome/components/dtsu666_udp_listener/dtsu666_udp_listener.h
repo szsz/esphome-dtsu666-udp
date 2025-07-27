@@ -59,8 +59,3 @@ class ModbusUdpListener : public Component {
 }  // namespace dtsu666_udp_listener
 }  // namespace esphome
 
-ESPHOME_NAMESPACE_BEGIN
-namespace dtsu666_udp_listener {
-  extern template class ModbusUdpListener;
-}
-ESPHOME_NAMESPACE_END
