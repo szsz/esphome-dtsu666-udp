@@ -12,10 +12,7 @@ class ModbusUdpListener : public Component {
   void set_port(uint16_t port) { port_ = port; }
   void set_device_id(uint8_t id) { device_id_ = id; has_device_id_ = true; }
 
-  void set_pt_sensor(sensor::Sensor *s) { 
-    ESP_LOGD("dtsu666_udp", "set_pt_sensor called, s=%p", s);
-    pt_ = s; 
-  }
+  void set_pt_sensor(sensor::Sensor *s);
   void set_pa_sensor(sensor::Sensor *s) { pa_ = s; }
   void set_pb_sensor(sensor::Sensor *s) { pb_ = s; }
   void set_pc_sensor(sensor::Sensor *s) { pc_ = s; }

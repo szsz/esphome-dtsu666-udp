@@ -114,5 +114,10 @@ bool ModbusUdpListener::parse_packet_(const uint8_t *data, size_t len) {
   return true;  // handled one frame
 }
 
+void esphome::dtsu666_udp_listener::ModbusUdpListener::set_pt_sensor(sensor::Sensor *s) {
+  ESP_LOGD("dtsu666_udp", "set_pt_sensor called, s=%p", s);
+  pt_ = s;
+}
+
 }  // namespace dtsu666_udp_listener
 }  // namespace esphome
