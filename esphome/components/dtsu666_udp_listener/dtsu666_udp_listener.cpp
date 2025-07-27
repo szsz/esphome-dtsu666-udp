@@ -73,13 +73,41 @@ bool ModbusUdpListener::parse_packet_(const uint8_t *data, size_t len) {
   } else {
     ESP_LOGE(TAG, "pt_ sensor pointer is null!");
   }
-  if (this->pa_) this->pa_->publish_state(regs[4]);
-  if (this->pb_) this->pb_->publish_state(regs[5]);
-  if (this->pc_) this->pc_->publish_state(regs[6]);
-  if (this->qt_) this->qt_->publish_state(regs[7]);
-  if (this->qa_) this->qa_->publish_state(regs[8]);
-  if (this->qb_) this->qb_->publish_state(regs[9]);
-  if (this->qc_) this->qc_->publish_state(regs[10]);
+  if (this->pa_) {
+    this->pa_->publish_state(regs[4]);
+  } else {
+    ESP_LOGE(TAG, "pa_ sensor pointer is null!");
+  }
+  if (this->pb_) {
+    this->pb_->publish_state(regs[5]);
+  } else {
+    ESP_LOGE(TAG, "pb_ sensor pointer is null!");
+  }
+  if (this->pc_) {
+    this->pc_->publish_state(regs[6]);
+  } else {
+    ESP_LOGE(TAG, "pc_ sensor pointer is null!");
+  }
+  if (this->qt_) {
+    this->qt_->publish_state(regs[7]);
+  } else {
+    ESP_LOGE(TAG, "qt_ sensor pointer is null!");
+  }
+  if (this->qa_) {
+    this->qa_->publish_state(regs[8]);
+  } else {
+    ESP_LOGE(TAG, "qa_ sensor pointer is null!");
+  }
+  if (this->qb_) {
+    this->qb_->publish_state(regs[9]);
+  } else {
+    ESP_LOGE(TAG, "qb_ sensor pointer is null!");
+  }
+  if (this->qc_) {
+    this->qc_->publish_state(regs[10]);
+  } else {
+    ESP_LOGE(TAG, "qc_ sensor pointer is null!");
+  }
 
   ESP_LOGI(TAG, "Published sensor values from matched frame.");
 

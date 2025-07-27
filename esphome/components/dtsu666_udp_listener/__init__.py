@@ -21,10 +21,10 @@ SENSORS = {
     "pa": ("W", DEVICE_CLASS_POWER),
     "pb": ("W", DEVICE_CLASS_POWER),
     "pc": ("W", DEVICE_CLASS_POWER),
-    "qt": ("var", DEVICE_CLASS_POWER),
-    "qa": ("var", DEVICE_CLASS_POWER),
-    "qb": ("var", DEVICE_CLASS_POWER),
-    "qc": ("var", DEVICE_CLASS_POWER),
+    "qt": ("kvar", DEVICE_CLASS_POWER),
+    "qa": ("kvar", DEVICE_CLASS_POWER),
+    "qb": ("kvar", DEVICE_CLASS_POWER),
+    "qc": ("kvar", DEVICE_CLASS_POWER),
 }
 
 CONFIG_SCHEMA = cv.Schema(
